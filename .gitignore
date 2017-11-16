@@ -52,6 +52,10 @@ target/ # Package Files #
 *.ear
 hs_err_pid* # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 
+
+# pyghon
+*/__pycache__
+
 # shared folders
 dropbox_shared*/
 github_shared*/
