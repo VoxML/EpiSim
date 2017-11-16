@@ -1,0 +1,43 @@
+<!doctype html>
+<title>{{ title }}</title>
+<script type="text/javascript"
+        src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+{% block body %}
+<script type="text/javascript">
+    $(function () {
+        var update = function() {
+            $.getJSON($SCRIPT_ROOT + '/loop',
+                function(data) {
+                for (var i in data.c) {
+                    var splitted = data.c[i].split("::") 
+                    var cid = splitted[0]
+                    var alpha = splitted[1]
+                    var c = $('#C'+cid)
+                    c.css('background','rgba({{ highlight }}, ' + alpha + ')');
+                    c.css('opacity','alpha');
+                }
+                for (var i in data.r) {
+                    var splitted = data.r[i].split("::") 
+                    var rid = splitted[0]
+                    var alpha = splitted[1]
+                    var r = $('#R'+rid);
+                    r.css('stroke','rgba({{ highlight }}, ' + alpha + ')');
+                    <!-- r.css('stroke', '{{ highlight }}'); -->
+                    r.css('stroke-opacity', 'alpha');
+{#                    $('#R'+data.r[i]).stroke('{{ highlight }}');#}
+                }
+                });
+        };
+        setInterval(update, 500);
+    });
+</script>
+{#<h1>EpiSim example</h1>#}
+
+{#    <h1> What's in her mind </h1>#}
+{{ divs|safe }}
+{{ svg|safe }}
+
+    {% endblock %}
