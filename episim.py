@@ -175,4 +175,18 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run()
+    import argparse
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description=__doc__
+    )
+    parser.add_argument(
+        '-p', '--port',
+        default=5000,
+        type=int,
+        action='store',
+        nargs='?',
+        help='Specify port number to run the app.'
+    )
+    args = parser.parse_args()
+    app.run(port=args.port)
