@@ -167,7 +167,8 @@ def index():
 
     if initialized:
         return render_template('visualize.html',
-                               highlight=AWARE_COLOR,
+                               defaultcolor=UNAWARE_COLOR,
+                               highlightcolor=AWARE_COLOR,
                                divs=get_all_concepts_divs(),
                                svg=get_all_relations_svgs())
     else:

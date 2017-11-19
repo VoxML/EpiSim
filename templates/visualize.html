@@ -7,27 +7,41 @@
 </script>
 {% block body %}
 <script type="text/javascript">
+    function getCertaintyColor(alpha) {
+        var defaultColor = "{{ defaultcolor }}".split(",");
+        var fullHighlight = "{{ highlightcolor }}".split(",");
+        var highlighted = [];
+        for (var i=0;i<3;i++) {
+            var defaultColorI = parseInt(defaultColor[i]);
+            var fullHighlightI = parseInt(fullHighlight[i]);
+            if (defaultColorI > fullHighlightI) {
+                highlighted.push(Math.round(defaultColorI - (defaultColorI - fullHighlightI) * alpha));
+            } else {
+                highlighted.push(Math.round(defaultColorI + (fullHighlightI - defaultColorI) * alpha));
+            }
+        }
+        highlighted.push(1.0);
+        return highlighted;
+
+    }
     $(function () {
         var update = function() {
             $.getJSON($SCRIPT_ROOT + '/loop',
                 function(data) {
                 for (var i in data.c) {
-                    var splitted = data.c[i].split("::") 
-                    var cid = splitted[0]
-                    var alpha = splitted[1]
-                    var c = $('#C'+cid)
-                    c.css('background','rgba({{ highlight }}, ' + alpha + ')');
-                    c.css('opacity','alpha');
+                    var splitted = data.c[i].split("::");
+                    var id = splitted[0];
+                    var alpha = parseFloat(splitted[1]);
+                    var object = $('#C'+id);
+                    object.css('background','rgba(' + getCertaintyColor(alpha) + ')');
                 }
-                for (var i in data.r) {
-                    var splitted = data.r[i].split("::") 
-                    var rid = splitted[0]
-                    var alpha = splitted[1]
-                    var r = $('#R'+rid);
-                    r.css('stroke','rgba({{ highlight }}, ' + alpha + ')');
-                    <!-- r.css('stroke', '{{ highlight }}'); -->
-                    r.css('stroke-opacity', 'alpha');
-{#                    $('#R'+data.r[i]).stroke('{{ highlight }}');#}
+                for (var j in data.r) {
+                    splitted = data.r[j].split("::");
+                    id = splitted[0];
+                    alpha = parseFloat(splitted[1]);
+                    object = $('#R'+id);
+                    object.css('stroke','rgba(' + getCertaintyColor(alpha) + ')');
+                    object.css('strokewidth', alpha*2+1.0);
                 }
                 });
         };

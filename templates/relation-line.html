@@ -1,7 +1,8 @@
 <line id="R{{ "{}-{}-{}-{}-{}".format(ori.ctype, ori.cmode, ori.cidx, dest.cmode, dest.cidx) }}"
       x1="{{ ori.x }}" y1="{{ ori.y }}"
       x2="{{ dest.x }}" y2="{{ dest.y }}"
-      stroke="{{ color }}"
+      stroke="rgba({{ color }}, 1.0)"
+      stroke-width="1"
       marker-end="url(#arrow-end)"
       {%  if bidirectional %}
         marker-start="url(#arrow-start)"
