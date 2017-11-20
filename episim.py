@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from model import Concepts, Concept, ConceptType, ConceptMode
+from iconify import stillframe
 
 # some constants
 CONCEPT_ID_SEP = ':'
@@ -16,7 +17,7 @@ AWARE_COLOR = "20,200,238"
 # initialize global variables
 concepts = {}
 initialized = False
-queue = []
+queue = {}
 
 # and initialize flask app
 app = Flask(__name__)
@@ -93,7 +94,7 @@ def get_concept_div(ctype, cidx, cmode, ctext):
 
 
 def get_representation(concept):
-    return concept.name + '-' + concept.modality.name
+    return stillframe.iconify(concept)
 
 
 @app.route('/init', methods=['POST'])
@@ -130,32 +131,22 @@ def get_concepts(concept_json, concept_type):
 def enqueue():
     global queue
     try:
-        queue.append(request.get_data(as_text=True))
+        for key, val in request.get_json().items():
+            queue[key] = queue.get(key, set()).update(val)
         return "200"
     except:
         return "500"
-
-    '''
-    for ctype in [0,1]:
-        for cmode in [0,1]:
-            for cdix in [0,1]:
-                queue.append(jsonify(c=['{}-{}-{}'.format(ctype, cmode, cdix)], r=[]))
-    for relation in ['0-0-0-1-1', '0-1-1-0-0']:
-        queue.append(jsonify(r=[relation], c=[]))
-    '''
 
 
 @app.route('/loop')
 def loop():
     global queue
     if len(queue) > 0:
-        data = queue.pop(0)
-        if len(data) > 0:
-            return data
-        else:
-            return jsonify(c=[], r=[])
+        jsonified = jsonify(queue)
     else:
-        return jsonify(c=[], r=[])
+        jsonified = jsonify(c=[], r=[])
+    queue = {}
+    return jsonified
 
 
 @app.route('/')
