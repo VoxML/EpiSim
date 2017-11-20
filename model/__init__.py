@@ -16,8 +16,8 @@ from enum import Enum
 
 class ConceptType(Enum):
     ACTION = 0
-    OBJECT = 1
-    PROPERTY = 2
+    PROPERTY = 1
+    OBJECT = 2
 
 
 class ConceptMode(Enum):

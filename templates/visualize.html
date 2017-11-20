@@ -48,10 +48,20 @@
         setInterval(update, 500);
     });
 </script>
-{#<h1>EpiSim example</h1>#}
+<!-- <h1>EpiSim example</h1> -->
 
 {#    <h1> What's in her mind </h1>#}
 {{ divs|safe }}
 {{ svg|safe }}
+<svg x = "0" y = "0" width="800" height="1000" style="position:absolute;">
+
+<line id="HR"
+      x1="100" y1="1000"
+      x2="700" y2="1000"
+      stroke="#000000"
+      stroke-width="5"
+</line>
+    </svg>
+
 
     {% endblock %}
