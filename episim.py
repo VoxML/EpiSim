@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from model import Concepts, Concept, ConceptType, ConceptMode
-from iconify import stillframe
+from iconify import anigif
 
 # some constants
 CONCEPT_ID_SEP = ':'
@@ -96,7 +96,7 @@ def get_concept_div(ctype, cidx, cmode, ctext):
 
 
 def get_representation(concept):
-    return stillframe.iconify(concept)
+    return anigif.iconify(concept)
 
 
 @app.route('/init', methods=['POST'])
