@@ -7,9 +7,11 @@ CONCEPT_ID_SEP = ':'
 JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
 INIT_XOFFSET = 100
-INIT_YOFFSET = 200
+INIT_YOFFSET = 100
 CONCEPT_WIDTH = 80
 CONCEPT_HEIGHT = 80
+VER_INTERVAL = 50
+ANCHOR_AMEND = 10
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.1)
 UNAWARE_COLOR = "238,200,200"
 AWARE_COLOR = "20,200,238"
@@ -28,12 +30,12 @@ def get_xoffset(cidx):
 
 
 def get_yoffset(ctype, cmode=ConceptMode(0)):
-    return INIT_YOFFSET * (ctype.value + 1) + (CONCEPT_HEIGHT * ctype.value * 3) + (CONCEPT_HEIGHT * cmode.value * 2)
+    return INIT_YOFFSET * (ctype.value + 1) + ((CONCEPT_HEIGHT*2 + VER_INTERVAL) * ctype.value) + (VER_INTERVAL + CONCEPT_HEIGHT) * cmode.value
 
 
 def get_anchor(ctype, cidx, cmode):
-    x = get_xoffset(cidx) + CONCEPT_WIDTH / 2 - 10
-    y = get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * (-cmode.value + 1) - 10
+    x = get_xoffset(cidx) + CONCEPT_WIDTH / 2 - ANCHOR_AMEND
+    y = get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * (-cmode.value + 1) - ANCHOR_AMEND
     return {'x': str(x), 'y': str(y)}
 
 
@@ -166,7 +168,8 @@ def index():
                                defaultcolor=UNAWARE_COLOR,
                                highlightcolor=AWARE_COLOR,
                                divs=get_all_concepts_divs(),
-                               svg=get_all_relations_svgs())
+                               svg=get_all_relations_svgs(), 
+                               hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
     else:
         return "hello world: " + str(initialized)
 
