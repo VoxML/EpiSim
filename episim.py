@@ -7,7 +7,7 @@ CONCEPT_ID_SEP = ':'
 JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
 INIT_XOFFSET = 100
-INIT_YOFFSET = 100
+INIT_YOFFSET = 200
 CONCEPT_WIDTH = 80
 CONCEPT_HEIGHT = 80
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.1)
@@ -111,7 +111,6 @@ def init():
 
 
 def get_concepts(concept_json, concept_type):
-    print(concept_type)
     concepts = Concepts()
     for concept in concept_json[concept_type]:
         concepts.add(Concept(concept['name'],
@@ -132,7 +131,13 @@ def enqueue():
     global queue
     try:
         for key, val in request.get_json().items():
-            queue[key] = queue.get(key, set()).update(val)
+            # using a set would be more efficient, 
+            # however it would cause more problems when serializing it
+            # using flask.jsonify
+            queue[key] = queue.get(key, [])
+            for item in val:
+                if item not in queue[key]:
+                    queue[key].append(item)
         return "200"
     except:
         return "500"
