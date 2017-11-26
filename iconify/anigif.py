@@ -5,10 +5,10 @@ gesture_image_mapping = {
     "posack": "thumbs_up.gif",
     "negack": "thumbs_down.gif",
     "point": "point.gif",
-    "push": "push.png",
+    "push": "push.gif",
     "grab": "claw.gif",
     "grasp": "claw.gif",
-    "move": "move.png",
+    "move": "move.gif",
 }
 
 
