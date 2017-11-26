@@ -8,6 +8,10 @@
 {% block body %}
 <script type="text/javascript">
     function getCertaintyColor(alpha) {
+        if (alpha < 0) {
+            console.log(alpha);
+            return [180, 180, 180, 1.0];
+        }
         var defaultColor = "{{ defaultcolor }}".split(",");
         var fullHighlight = "{{ highlightcolor }}".split(",");
         var highlighted = [];
