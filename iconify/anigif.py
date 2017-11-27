@@ -9,6 +9,20 @@ gesture_image_mapping = {
     "grab": "claw.gif",
     "grasp": "claw.gif",
     "move": "move.gif",
+    "right": "right.png",
+    "left": "left.png",
+    "up": "up.png",
+    "down": "down.png",
+    "forward": "forward.png",
+    "back": "back.png",
+    "block1": "block1.png",
+    "block2": "block2.png",
+    "block3": "block3.png",
+    "block4": "block4.png",
+    "block5": "block5.png",
+    "block6": "block6.png",
+    "block7": "block7.png",
+    "block8": "block8.png",
 }
 
 
