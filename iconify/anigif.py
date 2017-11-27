@@ -9,12 +9,12 @@ gesture_image_mapping = {
     "grab": "claw.gif",
     "grasp": "claw.gif",
     "move": "move.gif",
-    "right": "right.png",
-    "left": "left.png",
-    "up": "up.png",
-    "down": "down.png",
-    "forward": "forward.png",
-    "back": "back.png",
+    "RIGHT": "right.png",
+    "LEFT": "left.png",
+    "UP": "up.png",
+    "DOWN": "down.png",
+    "FRONT": "forward.png",
+    "BACK": "back.png",
     "block1": "block1.png",
     "block2": "block2.png",
     "block3": "block3.png",
@@ -23,6 +23,13 @@ gesture_image_mapping = {
     "block6": "block6.png",
     "block7": "block7.png",
     "block8": "block8.png",
+    "RED": "red.png",
+    "GREEN": "green.png",
+    "YELLOW": "yellow.png",
+    "ORANGE": "orange.png",
+    "BLACK": "black.png",
+    "PURPLE": "purple.png",
+    "WHITE": "white.png",
 }
 
 
@@ -34,7 +41,7 @@ def iconify(concept):
 
 
 def iconify_language(concept):
-    return get_concept_text(concept)
+    return iconify_gesture(concept)
 
 
 def get_concept_text(concept):
@@ -44,7 +51,7 @@ def get_concept_text(concept):
 def iconify_gesture(concept):
     concept_text = get_concept_text(concept)
     try:
-        return '<img src="/static/gifs/{}" alt="{}" width="{}" height="{}">'.format(
+        return '<img src="/static/gifs/{}" alt="{}" width="{}" height="{}" border="1">'.format(
             gesture_image_mapping[concept.name], concept_text, CONCEPT_WIDTH*0.9, CONCEPT_HEIGHT*0.9)
     except KeyError:
         return concept_text
