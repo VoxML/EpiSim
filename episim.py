@@ -185,5 +185,12 @@ if __name__ == '__main__':
         nargs='?',
         help='Specify port number to run the app.'
     )
+    parser.add_argument(
+        '-s', '--host',
+        default='127.0.0.1',
+        action='store',
+        nargs='?',
+        help='Specify host name for EpiSim to listen to.'
+    )
     args = parser.parse_args()
-    app.run(port=args.port)
+    app.run(host=args.host, port=args.port)
