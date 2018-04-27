@@ -9,10 +9,10 @@ JSON_SUBGROUP_SUFFIX = '-subgroups'
 JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
 INIT_XOFFSET = 100
-INIT_YOFFSET = 100
-CONCEPT_WIDTH = 80
-CONCEPT_HEIGHT = 80
-VER_INTERVAL = 50
+INIT_YOFFSET = 200
+CONCEPT_WIDTH = 100
+CONCEPT_HEIGHT = 100
+VER_INTERVAL = 100
 ANCHOR_AMEND = 10
 BOX_PAD = 6
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.2)
@@ -257,9 +257,9 @@ def index():
         return render_template('visualize.html',
                                defaultcolor=UNAWARE_COLOR,
                                highlightcolor=AWARE_COLOR,
-                               divs=get_all_concepts_divs(),
-                               svg=get_all_relations_svgs(),
-                               boxes=get_property_grouping_boxes(),
+                               concept_divs=get_all_concepts_divs(),
+                               relation_svg=get_all_relations_svgs(),
+                               property_boxes=get_property_grouping_boxes(),
                                hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
     else:
         return "hello world: " + str(initialized)

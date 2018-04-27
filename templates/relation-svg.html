@@ -1,10 +1,11 @@
+{% set arrowhead = 30 %}
 <svg x = "{{ x }}" y = "{{ y }}" width="{{ width }}" height="{{ height }}" style="position:absolute;">
     <defs>
-        <marker id="arrow-start" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-            <path d="M9,0 L0,3 L9,6 z" fill="#ff0000" />
+        <marker id="arrow-start" markerWidth="{{ arrowhead }}" markerHeight="{{ arrowhead }}" refX="0" refY="{{ arrowhead * 0.3 }}" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M{{ arrowhead }},0 L0,{{ arrowhead * 0.3 }} L{{ arrowhead }},{{ arrowhead * 0.6 }} z" stroke="#000000"></path>
         </marker>
-        <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="userSpaceOnUse">
-            <path d="M0,0 L0,6 L9,3 z" fill="#ff0000" />
+        <marker id="arrow-end" markerWidth="{{ arrowhead }}" markerHeight="{{ arrowhead }}" refX="{{ arrowhead }}" refY="{{ arrowhead * 0.3 }}" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L0,{{ arrowhead * 0.6 }} L{{ arrowhead }},{{ arrowhead * 0.3 }} z" stroke="#000000"></path>
         </marker>
     </defs>
 
