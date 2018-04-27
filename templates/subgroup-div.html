@@ -1,0 +1,14 @@
+<div id="G{{ "{}-{}-{}".format(ctype, cmode, gnum) }}" style="
+        width:{{ end.x - begin.x }}px;
+        height:{{ end.y - begin.y }}px;
+        left:{{ begin.x }}px;
+        top:{{ begin.y }}px;
+        background:rgba(0,0,0,0);
+        position:absolute;"
+     title="{{ gtext|safe }}"
+>
+    <fieldset style="height:75%;">
+        <legend style="font-size:10px;color:black;font-weight:thin;">{{ gtext|safe }}</legend>
+    </fieldset>
+</div>
+

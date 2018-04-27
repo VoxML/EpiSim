@@ -8,6 +8,10 @@
 {% block body %}
 <script type="text/javascript">
     function getCertaintyColor(alpha) {
+        if (alpha < 0) {
+            console.log(alpha);
+            return [180, 180, 180, 1.0];
+        }
         var defaultColor = "{{ defaultcolor }}".split(",");
         var fullHighlight = "{{ highlightcolor }}".split(",");
         var highlighted = [];
@@ -41,17 +45,27 @@
                     alpha = parseFloat(splitted[1]);
                     object = $('#R'+id);
                     object.css('stroke','rgba(' + getCertaintyColor(alpha) + ')');
-                    object.css('strokewidth', alpha*2+1.0);
+                    object.css('strokewidth', alpha*2+3.0);
                 }
                 });
         };
         setInterval(update, 500);
     });
 </script>
-{#<h1>EpiSim example</h1>#}
+<!-- <h1>EpiSim example</h1> -->
 
 {#    <h1> What's in her mind </h1>#}
 {{ divs|safe }}
 {{ svg|safe }}
+{{ boxes|safe }}
+<svg x = "0" y = "0" width="800" height="1000" style="position:absolute;">
+    <line id="HR"
+          x1="100" y1="{{ hr }}"
+           x2="700" y2="{{ hr }}"
+          stroke="#000000"
+          stroke-width="5">
+    </line>
+</svg>
+
 
     {% endblock %}

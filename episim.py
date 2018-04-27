@@ -1,21 +1,26 @@
 from flask import Flask, render_template, jsonify, request
-from model import Concepts, Concept, ConceptType, ConceptMode
-from iconify import stillframe
+from model import Concepts, Concept, ConceptType, ConceptMode, PropertyType
+from iconify import anigif
 
 # some constants
 CONCEPT_ID_SEP = ':'
+CONCEPT_CERTAINTY_SEP = '::'
+JSON_SUBGROUP_SUFFIX = '-subgroups'
 JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
 INIT_XOFFSET = 100
-INIT_YOFFSET = 200
+INIT_YOFFSET = 100
 CONCEPT_WIDTH = 80
 CONCEPT_HEIGHT = 80
-HOR_INTERVAL = int(CONCEPT_WIDTH * 0.1)
+VER_INTERVAL = 50
+ANCHOR_AMEND = 10
+BOX_PAD = 6
+HOR_INTERVAL = int(CONCEPT_WIDTH * 0.2)
 UNAWARE_COLOR = "238,200,200"
 AWARE_COLOR = "20,200,238"
 
 # initialize global variables
-concepts = {}
+all_concepts = {}
 initialized = False
 queue = {}
 
@@ -28,20 +33,28 @@ def get_xoffset(cidx):
 
 
 def get_yoffset(ctype, cmode=ConceptMode(0)):
-    return INIT_YOFFSET * (ctype.value + 1) + (CONCEPT_HEIGHT * ctype.value * 3) + (CONCEPT_HEIGHT * cmode.value * 2)
+    return INIT_YOFFSET * (ctype.value + 1) + ((CONCEPT_HEIGHT*2 + VER_INTERVAL) * ctype.value) + (VER_INTERVAL + CONCEPT_HEIGHT) * cmode.value
 
 
-def get_anchor(ctype, cidx, cmode):
-    x = get_xoffset(cidx) + CONCEPT_WIDTH / 2 - 10
-    y = get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * (-cmode.value + 1) - 10
+def get_anchor(ctype, cmode, cidx):
+    x = get_xoffset(cidx) + CONCEPT_WIDTH / 2 - ANCHOR_AMEND
+    y = get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * (-cmode.value + 1) - ANCHOR_AMEND
     return {'x': str(x), 'y': str(y)}
+
+
+def get_group_box_anchors(ctype, cmode, begin_idx, end_idx):
+    topleft = {'x': get_xoffset(begin_idx) - (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) - (1.5*BOX_PAD)}
+    bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT + (1.5*BOX_PAD)}
+    # topleft = {'x': get_xoffset(begin_idx) - (BOX_PAD), 'y': get_yoffset(ctype, cmode) - (BOX_PAD)}
+    # bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + (BOX_PAD), 'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT + (BOX_PAD)}
+    return topleft, bottomright
 
 
 def get_all_relations_svgs():
     all_lines = []
-    for ctype in concepts:
+    for ctype in all_concepts:
         all_lines.extend([get_relation_line(ctype, relation)
-                          for relation in concepts[ctype].relations.items()])
+                          for relation in all_concepts[ctype].relations.items()])
     return render_template('relation-svg.html',
                            x=0,
                            y=0,
@@ -57,11 +70,11 @@ def get_relation_line(ctype, relation):
         prepped = {}
         type = x.type
         mode = x.modality
-        idx = concepts[ctype].get_index_or_add(x)
+        idx = all_concepts[ctype].get_index(x)
         prepped['ctype'] = type.value
         prepped['cmode'] = mode.value
         prepped['cidx'] = idx
-        prepped.update(get_anchor(type, idx, mode))
+        prepped.update(get_anchor(type, mode, idx))
         return prepped
     orig, dest = map(lambda x: prep(x), relation[0])
     return render_template('relation-line.html',
@@ -71,12 +84,44 @@ def get_relation_line(ctype, relation):
                            bidirectional=relation[1] == 1)
 
 
+def get_property_grouping_boxes():
+    # for the time being, let's just handle PROP only
+    # also currently only handle modality 0, which is language (no gestural properties)
+
+    boxes = []
+
+    ctype = ConceptType.PROPERTY
+    subgroups = all_concepts[ctype].prop_groups
+    for cmode in [ConceptMode.L, ConceptMode.G]:
+        # pass un-grouped concepts
+        cur_box = len(subgroups[0].members[cmode.value])
+        for group_num, subgroup in enumerate(subgroups[1:]):
+            concepts_in_group = len(subgroup.members[cmode.value])
+            if concepts_in_group > 0:
+                b,e = get_group_box_anchors(ctype, cmode, cur_box, -1 + cur_box + concepts_in_group)
+                boxes.append(render_template('subgroup-div.html',
+                                             ctype=ctype.value,
+                                             cmode=cmode.value,
+                                             gnum=group_num,
+                                             begin=b,
+                                             end=e,
+                                             gtext=str(subgroup)
+                                             ))
+            cur_box += concepts_in_group
+    if len(boxes) > 0:
+        return '\n'.join(boxes)
+    return ''
+
+
 def get_all_concepts_divs():
     divs = []
-    for ctype in concepts:
-        for cmode in concepts[ctype].concepts:
-            for cidx, concept in enumerate(concepts[ctype].concepts[cmode]):
-                divs.append(get_concept_div(ctype, cidx, cmode, get_representation(concept)))
+    for ctype, typed_concepts in all_concepts.items():
+        for cmode, moded_concepts in typed_concepts.concepts.items():
+            for cidx, concept in enumerate(moded_concepts):
+                if ctype == ConceptType.PROPERTY:
+                    divs.append(get_concept_div(ctype, typed_concepts.reindex(concept), cmode, get_representation(concept)))
+                else:
+                    divs.append(get_concept_div(ctype, cidx, cmode, get_representation(concept)))
     return '\n'.join(divs)
 
 
@@ -94,23 +139,51 @@ def get_concept_div(ctype, cidx, cmode, ctext):
 
 
 def get_representation(concept):
-    return stillframe.iconify(concept)
+    return anigif.iconify(concept)
 
 
 @app.route('/init', methods=['POST'])
 def init():
     global initialized
-    global concepts
+    global all_concepts
 
     inp_json = request.get_json()
-    concepts[ConceptType.ACTION] = get_concepts(inp_json, 'ACTION')
-    concepts[ConceptType.OBJECT] = get_concepts(inp_json, 'OBJECT')
-    concepts[ConceptType.PROPERTY] = get_concepts(inp_json, 'PROPERTY')
+    all_concepts[ConceptType.ACTION] = get_concepts(inp_json, 'ACTION')
+    all_concepts[ConceptType.OBJECT] = get_concepts(inp_json, 'OBJECT')
+    all_concepts[ConceptType.PROPERTY] = get_concepts(inp_json, 'PROPERTY')
     initialized = True
     return str(initialized)
 
 
 def get_concepts(concept_json, concept_type):
+    if concept_type == 'PROPERTY':
+        return get_propery_concepts(concept_json, concept_type)
+    else:
+        return get_general_concepts(concept_json, concept_type)
+
+
+def get_propery_concepts(concept_json, concept_type):
+    """ Currently we have no gestural vocabulary for properties.
+    Thus, I don't worry about reordering indices for relation linking. """
+    concepts = Concepts()
+
+    for subgroup in concept_json[concept_type + JSON_SUBGROUP_SUFFIX]:
+        concepts.add_prop_group(subgroup['name'], PropertyType[subgroup['type']])
+
+    for concept in concept_json[concept_type]:
+        new_concept = Concept(concept['name'],
+                              ConceptType[concept_type],
+                              ConceptMode[concept['modality']])
+        try:
+            new_concept.subgroup(concept['subgroup'])
+        except KeyError:
+            # as subgroup is set to None by default
+            pass
+        concepts.add(new_concept)
+    return concepts
+
+
+def get_general_concepts(concept_json, concept_type):
     concepts = Concepts()
     for concept in concept_json[concept_type]:
         concepts.add(Concept(concept['name'],
@@ -126,6 +199,12 @@ def get_concepts(concept_json, concept_type):
     return concepts
 
 
+def reindex(ctype, cmode, cidx):
+    c_collection = all_concepts[ConceptType(int(ctype))]
+    concept = c_collection.get_concept(ConceptMode(cmode), int(cidx))
+    return c_collection.get_index(concept)
+
+
 @app.route('/aware', methods=['POST'])
 def enqueue():
     global queue
@@ -136,6 +215,19 @@ def enqueue():
             # using flask.jsonify
             queue[key] = queue.get(key, [])
             for item in val:
+                if key == 'c':
+                    c_id, certainty = item.split(CONCEPT_CERTAINTY_SEP)
+                    ctype, cmode, cidx = map(int, c_id.split(JSON_RELATION_CONNECTOR))
+                    item = '{}{}{}'.format(JSON_RELATION_CONNECTOR.join(map(str, [ctype, cmode, reindex(ctype, cmode, cidx)])),
+                                           CONCEPT_CERTAINTY_SEP,
+                                           certainty)
+                if key == 'r':
+                    r_id, certainty = item.split(CONCEPT_CERTAINTY_SEP)
+                    ctype, omode, oidx, dmode, didx = map(int, r_id.split(JSON_RELATION_CONNECTOR))
+                    item = '{}{}{}'.format(JSON_RELATION_CONNECTOR.join(map(str, [ctype, omode, reindex(ctype, omode, oidx), dmode, reindex(ctype, dmode, didx)])),
+                                           CONCEPT_CERTAINTY_SEP,
+                                           certainty)
+
                 if item not in queue[key]:
                     queue[key].append(item)
         return "200"
@@ -157,7 +249,7 @@ def loop():
 @app.route('/')
 def index():
     global initialized
-    global concepts
+    global all_concepts
     enqueue()
     #  init()
 
@@ -166,7 +258,9 @@ def index():
                                defaultcolor=UNAWARE_COLOR,
                                highlightcolor=AWARE_COLOR,
                                divs=get_all_concepts_divs(),
-                               svg=get_all_relations_svgs())
+                               svg=get_all_relations_svgs(),
+                               boxes=get_property_grouping_boxes(),
+                               hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
     else:
         return "hello world: " + str(initialized)
 
