@@ -45,8 +45,6 @@ def get_anchor(ctype, cmode, cidx):
 def get_group_box_anchors(ctype, cmode, begin_idx, end_idx):
     topleft = {'x': get_xoffset(begin_idx) - (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) - (1.5*BOX_PAD)}
     bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT + (1.5*BOX_PAD)}
-    # topleft = {'x': get_xoffset(begin_idx) - (BOX_PAD), 'y': get_yoffset(ctype, cmode) - (BOX_PAD)}
-    # bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + (BOX_PAD), 'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT + (BOX_PAD)}
     return topleft, bottomright
 
 
@@ -115,6 +113,7 @@ def get_property_grouping_boxes():
 
 def get_all_concepts_divs():
     divs = []
+    labels = {}
     for ctype, typed_concepts in all_concepts.items():
         for cmode, moded_concepts in typed_concepts.concepts.items():
             for cidx, concept in enumerate(moded_concepts):
@@ -122,7 +121,65 @@ def get_all_concepts_divs():
                     divs.append(get_concept_div(ctype, typed_concepts.reindex(concept), cmode, get_representation(concept)))
                 else:
                     divs.append(get_concept_div(ctype, cidx, cmode, get_representation(concept)))
+                if not (ctype, cmode) in labels:
+                    labels[(ctype, cmode)] = get_modality_label(ctype, cmode)
+                    # using -1 for cmode of linkages
+                    if not (ctype, -1) in labels and (ctype, ConceptMode(0)) in labels and (
+                            ctype, ConceptMode(1)) in labels:
+                        labels[(ctype, -1)] = get_linkage_label(ctype)
+    divs.extend(labels.values())
     return '\n'.join(divs)
+
+
+def get_modality_label(ctype, cmode):
+    return '<div id="label-{ctype}-{cmode}" style="' \
+           'width: {w}px;' \
+           'line-height: {h}px;' \
+           'left: {x}px;' \
+           'top: {y}px;' \
+           'background: rgba(20,20,20,0);' \
+           'border: 1px solid red;' \
+           'border-radius: 5px;' \
+           'text-align: center;' \
+           'font-style: italic;' \
+           'font-color: #20a020;' \
+           'font-size: {fs}px;' \
+           'position: absolute;' \
+           '">{label}</div>'.format(
+        ctype=ctype.value,
+        cmode=cmode.value,
+        w=CONCEPT_WIDTH * 0.5,
+        h=CONCEPT_HEIGHT * 0.9,
+        x=max(10, get_xoffset(0) - CONCEPT_WIDTH * 0.7),
+        y=get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * 0.05,
+        label=ConceptMode(cmode).name,
+        fs=CONCEPT_WIDTH * 0.5
+    )
+
+
+def get_linkage_label(ctype):
+    return '<div id="label-{ctype}-l" style="' \
+           'width: {w}px;' \
+           'line-height: {h}px;' \
+           'left: {x}px;' \
+           'top: {y}px;' \
+           'background: rgba(20,20,20,0);' \
+           'border: 1px solid red;' \
+           'border-radius: 5px;' \
+           'text-align: center;' \
+           'font-style: italic;' \
+           'font-color: #20a020;' \
+           'font-size: {fs}px;' \
+           'position: absolute;' \
+           '">{label}</div>'.format(
+        ctype=ctype.value,
+        w=CONCEPT_WIDTH * 0.5,
+        h=CONCEPT_HEIGHT * 0.9,
+        x=max(10, get_xoffset(0) - CONCEPT_WIDTH * 0.7),
+        y=get_yoffset(ctype) + CONCEPT_HEIGHT * 1.05,
+        label='A',
+        fs=CONCEPT_WIDTH * 0.5
+    )
 
 
 def get_concept_div(ctype, cidx, cmode, ctext):
