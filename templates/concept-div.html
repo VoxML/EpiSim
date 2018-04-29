@@ -3,8 +3,20 @@
         height:{{ cheight }}px;
         left:{{ xoffset }}px;
         top:{{ yoffset }}px;
+        border: 1px solid black;
+        border-radius: 5px;
+        text-align: center;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        display: table;
+        table-layout: fixed;
         background:rgba({{ color }}, 1.0);
         position:absolute;">
-    {{ ctext|safe }}
+    <div style="
+            display: table-cell;
+            vertical-align: middle;
+            ">
+        {{ ctext|safe }}
+    </div>
 </div>
 

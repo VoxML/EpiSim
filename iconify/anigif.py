@@ -1,6 +1,8 @@
 import model
 from episim import CONCEPT_HEIGHT, CONCEPT_WIDTH
 
+LANGUAGE_FONTSIZE = 30
+
 gesture_image_mapping = {
     "posack": "thumbs_up.gif",
     "negack": "thumbs_down.gif",
@@ -41,7 +43,9 @@ def iconify(concept):
 
 
 def iconify_language(concept):
-    return iconify_gesture(concept)
+    return '<p style="font-size:{fs}px">{ctext}</p>'.format(
+        fs=LANGUAGE_FONTSIZE,
+        ctext=get_concept_text(concept))
 
 
 def get_concept_text(concept):
@@ -54,4 +58,6 @@ def iconify_gesture(concept):
         return '<img src="/static/gifs/{}" alt="{}" width="{}" height="{}" border="1">'.format(
             gesture_image_mapping[concept.name], concept_text, CONCEPT_WIDTH*0.9, CONCEPT_HEIGHT*0.9)
     except KeyError:
-        return concept_text
+        return iconify_language(concept)
+
+
