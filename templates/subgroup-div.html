@@ -7,8 +7,8 @@
         position:absolute;"
      title="{{ gtext|safe }}"
 >
-    <fieldset style="height:75%;">
-        <legend style="font-size:10px;color:black;font-weight:thin;">{{ gtext|safe }}</legend>
+    <fieldset style="height:{{ end.y - begin.y + ([0, fs - 20] | max) }}px">
+        <legend style="font-size:{{ fs }}px;color:black;font-weight:thin;">{{ gtext|safe }}</legend>
     </fieldset>
 </div>
 

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
-from model import Concepts, Concept, ConceptType, ConceptMode, PropertyType
+
 from iconify import anigif
+from model import Concepts, Concept, ConceptType, ConceptMode, PropertyType
 
 # some constants
 CONCEPT_ID_SEP = ':'
@@ -10,12 +11,13 @@ JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
 INIT_XOFFSET = 100
 INIT_YOFFSET = 200
-CONCEPT_WIDTH = 100
-CONCEPT_HEIGHT = 100
-VER_INTERVAL = 100
+CONCEPT_WIDTH = 150
+CONCEPT_HEIGHT = 150
+VER_INTERVAL = 120
 ANCHOR_AMEND = 10
 BOX_PAD = 6
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.2)
+PROP_GROUP_LEGEND_FONTSIZE = 30
 UNAWARE_COLOR = "238,200,200"
 AWARE_COLOR = "20,200,238"
 
@@ -43,8 +45,10 @@ def get_anchor(ctype, cmode, cidx):
 
 
 def get_group_box_anchors(ctype, cmode, begin_idx, end_idx):
-    topleft = {'x': get_xoffset(begin_idx) - (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) - (1.5*BOX_PAD)}
-    bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + (1.5*BOX_PAD), 'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT + (1.5*BOX_PAD)}
+    topleft = {'x': get_xoffset(begin_idx) - BOX_PAD,
+               'y': get_yoffset(ctype, cmode) - PROP_GROUP_LEGEND_FONTSIZE}
+    bottomright = {'x': get_xoffset(end_idx) + CONCEPT_WIDTH + BOX_PAD, # * 2 for compensate padding at topleft point
+                   'y': get_yoffset(ctype, cmode) + CONCEPT_HEIGHT }
     return topleft, bottomright
 
 
@@ -103,12 +107,19 @@ def get_property_grouping_boxes():
                                              gnum=group_num,
                                              begin=b,
                                              end=e,
-                                             gtext=str(subgroup)
+                                             gtext=str(subgroup),
+                                             fs=PROP_GROUP_LEGEND_FONTSIZE
                                              ))
             cur_box += concepts_in_group
     if len(boxes) > 0:
         return '\n'.join(boxes)
     return ''
+
+def get_prop_group_legend(text):
+    return '<legend style = "font-size:{fs}px;' \
+           'color:black;' \
+           'font-weight:thin;' \
+           '"> {text} < / legend >'.format(fs=PROP_GROUP_LEGEND_FONTSIZE, text=text)
 
 
 def get_all_concepts_divs():
@@ -174,7 +185,7 @@ def get_linkage_label(ctype):
            '">{label}</div>'.format(
         ctype=ctype.value,
         w=CONCEPT_WIDTH * 0.5,
-        h=CONCEPT_HEIGHT * 0.9,
+        h=VER_INTERVAL * 0.9,
         x=max(10, get_xoffset(0) - CONCEPT_WIDTH * 0.7),
         y=get_yoffset(ctype) + CONCEPT_HEIGHT * 1.05,
         label='A',
