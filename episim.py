@@ -18,8 +18,9 @@ ANCHOR_AMEND = 10
 BOX_PAD = 6
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.2)
 PROP_GROUP_LEGEND_FONTSIZE = 20
-UNAWARE_COLOR = "238,200,200"
-AWARE_COLOR = "20,200,238"
+UNAWARE_COLOR = "250,30,0"
+UNCERTAIN_COLOR = "250,200,0"
+AWARE_COLOR = "00,250,00"
 
 # initialize global variables
 all_concepts = {}
@@ -323,8 +324,9 @@ def index():
 
     if initialized:
         return render_template('visualize.html',
-                               defaultcolor=UNAWARE_COLOR,
-                               highlightcolor=AWARE_COLOR,
+                               startColor=UNAWARE_COLOR,
+                               midColor=UNCERTAIN_COLOR,
+                               endColor=AWARE_COLOR,
                                concept_divs=get_all_concepts_divs(),
                                relation_svg=get_all_relations_svgs(),
                                property_boxes=get_property_grouping_boxes(),

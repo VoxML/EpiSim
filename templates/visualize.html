@@ -7,21 +7,29 @@
 </script>
 {% block body %}
     <script type="text/javascript">
-        function getCertaintyColor(alpha) {
-            if (alpha < 0) {
-                console.log(alpha);
-                return [180, 180, 180, 1.0];
+        function getCertaintyColor(certainty) {
+            let fullHighlight;
+            let defaultColor;
+            if (certainty < 0) {
+                return [80, 80, 80, 1.0];
             }
-            var defaultColor = "{{ defaultcolor }}".split(",");
-            var fullHighlight = "{{ highlightcolor }}".split(",");
-            var highlighted = [];
+            const highlighted = [];
+            if (certainty <= 0.5) {
+                defaultColor = "{{ startColor }}".split(",");
+                fullHighlight = "{{ midColor }}".split(",");
+                certainty = certainty * 2;
+            } else {
+                defaultColor = "{{ midColor }}".split(",");
+                fullHighlight = "{{ endColor }}".split(",");
+                certainty = (certainty - 0.5) * 2;
+            }
             for (var i=0;i<3;i++) {
-                var defaultColorI = parseInt(defaultColor[i]);
-                var fullHighlightI = parseInt(fullHighlight[i]);
+                const defaultColorI = parseInt(defaultColor[i]);
+                const fullHighlightI = parseInt(fullHighlight[i]);
                 if (defaultColorI > fullHighlightI) {
-                    highlighted.push(Math.round(defaultColorI - (defaultColorI - fullHighlightI) * alpha));
+                    highlighted.push(Math.round(defaultColorI - (defaultColorI - fullHighlightI) * certainty));
                 } else {
-                    highlighted.push(Math.round(defaultColorI + (fullHighlightI - defaultColorI) * alpha));
+                    highlighted.push(Math.round(defaultColorI + (fullHighlightI - defaultColorI) * certainty));
                 }
             }
             highlighted.push(1.0);
@@ -29,23 +37,25 @@
 
         }
         $(function () {
-            var update = function() {
+            const update = function () {
                 $.getJSON($SCRIPT_ROOT + '/loop',
-                    function(data) {
-                        for (var i in data.c) {
-                            var splitted = data.c[i].split("::");
-                            var id = splitted[0];
-                            var alpha = parseFloat(splitted[1]);
-                            var object = $('#C'+id);
-                            object.css('background','rgba(' + getCertaintyColor(alpha) + ')');
+                    function (data) {
+                        let id;
+                        let splitted;
+                        for (const i in data.c) {
+                            splitted = data.c[i].split("::");
+                            id = splitted[0];
+                            var certainty = parseFloat(splitted[1]);
+                            var object = $('#C' + id);
+                            object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
                         }
-                        for (var j in data.r) {
+                        for (const j in data.r) {
                             splitted = data.r[j].split("::");
                             id = splitted[0];
-                            alpha = parseFloat(splitted[1]);
-                            object = $('#R'+id);
-                            object.css('stroke','rgba(' + getCertaintyColor(alpha) + ')');
-                            object.css('strokewidth', alpha*2+3.0);
+                            certainty = parseFloat(splitted[1]);
+                            object = $('#R' + id);
+                            object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
+                            object.css('strokewidth', certainty * 2 + 3.0);
                         }
                     });
             };
