@@ -17,7 +17,7 @@ VER_INTERVAL = 120
 ANCHOR_AMEND = 10
 BOX_PAD = 6
 HOR_INTERVAL = int(CONCEPT_WIDTH * 0.2)
-PROP_GROUP_LEGEND_FONTSIZE = 30
+PROP_GROUP_LEGEND_FONTSIZE = 20
 UNAWARE_COLOR = "238,200,200"
 AWARE_COLOR = "20,200,238"
 
@@ -148,7 +148,7 @@ def get_modality_label(ctype, cmode):
            'line-height: {h}px;' \
            'left: {x}px;' \
            'top: {y}px;' \
-           'background: rgba(20,20,20,0);' \
+           'background: rgba(0,0,0,0);' \
            'border: 1px solid red;' \
            'border-radius: 5px;' \
            'text-align: center;' \
@@ -174,7 +174,7 @@ def get_linkage_label(ctype):
            'line-height: {h}px;' \
            'left: {x}px;' \
            'top: {y}px;' \
-           'background: rgba(20,20,20,0);' \
+           'background: rgba(220,220,220,1);' \
            'border: 1px solid red;' \
            'border-radius: 5px;' \
            'text-align: center;' \
