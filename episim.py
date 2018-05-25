@@ -189,7 +189,7 @@ def get_linkage_label(ctype):
         h=VER_INTERVAL * 0.9,
         x=max(10, get_xoffset(0) - CONCEPT_WIDTH * 0.7),
         y=get_yoffset(ctype) + CONCEPT_HEIGHT * 1.05,
-        label='A',
+        label='L',
         fs=CONCEPT_WIDTH * 0.5
     )
 
