@@ -56,7 +56,7 @@ def iconify_gesture(concept):
     concept_text = get_concept_text(concept)
     try:
         return '<img src="/static/gifs/{}" alt="{}" width="{}" height="{}" border="1">'.format(
-            gesture_image_mapping[concept.name], concept_text, CONCEPT_WIDTH*0.9, CONCEPT_HEIGHT*0.9)
+            gesture_image_mapping[concept.name], concept_text, CONCEPT_WIDTH*0.75, CONCEPT_HEIGHT*0.75)
     except KeyError:
         return iconify_language(concept)
 

@@ -304,8 +304,8 @@ def enqueue():
         return "500"
 
 
-@app.route('/loop')
-def loop():
+@app.route('/awareloop')
+def jsonify_incoming_aware():
     global queue
     if len(queue) > 0:
         jsonified = jsonify(queue)

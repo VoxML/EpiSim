@@ -5,7 +5,7 @@
 <script type="text/javascript">
     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
-{% block body %}
+<body>
     <script type="text/javascript">
         function getCertaintyColor(certainty) {
             let fullHighlight;
@@ -36,30 +36,33 @@
             return highlighted;
 
         }
-        $(function () {
-            const update = function () {
-                $.getJSON($SCRIPT_ROOT + '/loop',
-                    function (data) {
-                        let id;
-                        let splitted;
-                        for (const i in data.c) {
-                            splitted = data.c[i].split("::");
-                            id = splitted[0];
-                            var certainty = parseFloat(splitted[1]);
-                            var object = $('#C' + id);
-                            object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
-                        }
-                        for (const j in data.r) {
-                            splitted = data.r[j].split("::");
-                            id = splitted[0];
-                            certainty = parseFloat(splitted[1]);
-                            object = $('#R' + id);
-                            object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
-                            object.css('strokewidth', certainty * 2 + 3.0);
-                        }
-                    });
-            };
-            setInterval(update, 500);
+        {# define looping function that runs after the document is fully loaded #}
+        function aware() {
+            $.getJSON($SCRIPT_ROOT + '/awareloop',
+                function (data) {
+                    let id;
+                    let splitted;
+                    for (const i in data.c) {
+                        splitted = data.c[i].split("::");
+                        id = splitted[0];
+                        var certainty = parseFloat(splitted[1]);
+                        var object = $('#C' + id);
+                        object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
+                    }
+                    for (const j in data.r) {
+                        splitted = data.r[j].split("::");
+                        id = splitted[0];
+                        certainty = parseFloat(splitted[1]);
+                        object = $('#R' + id);
+                        object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
+                        object.css('strokewidth', certainty * 2 + 3.0);
+                    }
+                });
+        };
+
+        {# run the looping function once the document is fully loaded #}
+        $(document).ready(function () {
+            setInterval(aware, 500);
         });
     </script>
     <div id="title" style="
@@ -69,18 +72,11 @@
             top:0px;
             background:rgba(0,0,0,0);
             position:fixed;"
-         title="EpiSim"><h1 align="center">EpiSim</h1></div>
+         title="EpiSim">
+        <h1 align="center">EpiSim</h1>
+        <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
+    </div>
     {{ concept_divs|safe }}
     {{ relation_svg|safe }}
     {{ property_boxes|safe }}
-    <svg x = "0" y = "0" width="800" height="1000" style="position:absolute;">
-        <line id="HR"
-              x1="100" y1="{{ hr }}"
-              x2="700" y2="{{ hr }}"
-              stroke="#000000"
-              stroke-width="5">
-        </line>
-    </svg>
-
-
-{% endblock %}
+</body>
