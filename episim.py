@@ -198,7 +198,7 @@ def get_linkage_label(ctype):
         h=VER_INTERVAL * 0.9,
         x=max(10, get_xoffset(0) - CONCEPT_WIDTH * 0.7),
         y=get_yoffset(ctype) + CONCEPT_HEIGHT * 1.05,
-        label='L',
+        label='R',
         fs=CONCEPT_WIDTH * 0.5
     )
 
@@ -301,6 +301,7 @@ def enqueue_epistemic_update():
     global queue
     try:
         json = request.get_json()
+        # app.logger.error(json)
         # "0" is termination signal ('engage stop'), purge the queue
         if json == 0:
             queue = None
