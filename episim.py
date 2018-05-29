@@ -54,6 +54,9 @@ def get_group_box_anchors(ctype, cmode, begin_idx, end_idx):
 
 
 def get_all_relations_svgs():
+    if len(all_concepts) == 0:
+        return ""
+
     all_lines = []
     for ctype in all_concepts:
         all_lines.extend([get_relation_line(ctype, relation)
@@ -88,6 +91,9 @@ def get_relation_line(ctype, relation):
 
 
 def get_property_grouping_boxes():
+    if len(all_concepts) == 0:
+        return ""
+
     # for the time being, let's just handle PROP only
     # also currently only handle modality 0, which is language (no gestural properties)
 
@@ -124,6 +130,8 @@ def get_prop_group_legend(text):
 
 
 def get_all_concepts_divs():
+    if len(all_concepts) == 0:
+        return ""
     divs = []
     labels = {}
     for ctype, typed_concepts in all_concepts.items():
@@ -224,6 +232,11 @@ def init():
     return str(initialized)
 
 
+@app.route('/initloop')
+def is_initialized():
+    return "0" if not initialized else "1"
+
+
 def get_concepts(concept_json, concept_type):
     if concept_type == 'PROPERTY':
         return get_propery_concepts(concept_json, concept_type)
@@ -275,9 +288,16 @@ def reindex(ctype, cmode, cidx):
 
 
 @app.route('/aware', methods=['POST'])
-def enqueue():
+def enqueue_epistemic_update():
     global queue
     try:
+        json = request.get_json()
+        # "0" is termination signal ('engage stop'), purge the queue
+        if json == 0:
+            queue = None
+            return "205"
+        if queue is None:
+            queue = {}
         for key, val in request.get_json().items():
             # using a set would be more efficient, 
             # however it would cause more problems when serializing it
@@ -307,8 +327,18 @@ def enqueue():
 @app.route('/awareloop')
 def jsonify_incoming_aware():
     global queue
-    if len(queue) > 0:
+    global initialized
+    global all_concepts
+
+    # if the queue set to None by the POST request "0" (termination)
+    if queue is None:
+        initialized = False
+        all_concepts = {}
+        jsonified = "0"  # this, again, be used as termination in backend JS
+    # normally POST-ed
+    elif len(queue) > 0:
         jsonified = jsonify(queue)
+    # otherwise, nothing is POST-ed / enqueued
     else:
         jsonified = jsonify(c=[], r=[])
     queue = {}
@@ -317,22 +347,14 @@ def jsonify_incoming_aware():
 
 @app.route('/')
 def index():
-    global initialized
-    global all_concepts
-    enqueue()
-    #  init()
-
-    if initialized:
-        return render_template('visualize.html',
-                               startColor=UNAWARE_COLOR,
-                               midColor=UNCERTAIN_COLOR,
-                               endColor=AWARE_COLOR,
-                               concept_divs=get_all_concepts_divs(),
-                               relation_svg=get_all_relations_svgs(),
-                               property_boxes=get_property_grouping_boxes(),
-                               hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
-    else:
-        return "hello world: " + str(initialized)
+    return render_template('visualize.html',
+                           startColor=UNAWARE_COLOR,
+                           midColor=UNCERTAIN_COLOR,
+                           endColor=AWARE_COLOR,
+                           concept_divs=get_all_concepts_divs(),
+                           relation_svg=get_all_relations_svgs(),
+                           property_boxes=get_property_grouping_boxes(),
+                           hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
 
 
 if __name__ == '__main__':
