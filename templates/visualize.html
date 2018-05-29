@@ -7,6 +7,9 @@
 </script>
 <body>
     <script type="text/javascript">
+        {# 0/F - waiting for init, 1/T - waiting for update #}
+        var initiated = 0;
+
         function getCertaintyColor(certainty) {
             let fullHighlight;
             let defaultColor;
@@ -36,33 +39,71 @@
             return highlighted;
 
         }
-        {# define looping function that runs after the document is fully loaded #}
-        function aware() {
+
+        function update() {
+            if (!initiated) {
+                wait_init();
+            }  else {
+                wait_aware()
+            }
+        }
+
+        {# define looping function for epistemic initialization #}
+        function wait_init() {
+            $.getJSON($SCRIPT_ROOT + '/initloop',
+            function (data) {
+                initiated = parseInt(data);
+                if (initiated) {
+                    {# when initialized, reload page and flip the loop fn #}
+                    {# hack job to force reload just once #}
+                    var url = window.location.href;
+                    if (url.indexOf('?') < 1) {
+                        if(url.indexOf('init') < 0){
+                            url = url + "?init=true";
+                            window.location = url;
+                        }
+                    }
+                }
+            })
+        }
+
+        {# define looping function for epistemic update #}
+        function wait_aware() {
             $.getJSON($SCRIPT_ROOT + '/awareloop',
-                function (data) {
-                    let id;
-                    let splitted;
-                    for (const i in data.c) {
-                        splitted = data.c[i].split("::");
-                        id = splitted[0];
-                        var certainty = parseFloat(splitted[1]);
-                        var object = $('#C' + id);
-                        object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
+            function (data) {
+                {# feed "0" when diana says "bye", then reload page and flip the loop fn #}
+                if (parseInt(data) === 0) {
+                    initiated = 0;
+                    var url = window.location.href;
+                    if (url.indexOf('?') > -1) {
+                        url = url.substring(0,url.indexOf('?'))
+                        window.location = url;
                     }
-                    for (const j in data.r) {
-                        splitted = data.r[j].split("::");
-                        id = splitted[0];
-                        certainty = parseFloat(splitted[1]);
-                        object = $('#R' + id);
-                        object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
-                        object.css('strokewidth', certainty * 2 + 3.0);
-                    }
-                });
-        };
+                    return;
+                }
+                let id;
+                let splitted;
+                for (const i in data.c) {
+                    splitted = data.c[i].split("::");
+                    id = splitted[0];
+                    var certainty = parseFloat(splitted[1]);
+                    var object = $('#C' + id);
+                    object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
+                }
+                for (const j in data.r) {
+                    splitted = data.r[j].split("::");
+                    id = splitted[0];
+                    certainty = parseFloat(splitted[1]);
+                    object = $('#R' + id);
+                    object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
+                    object.css('strokewidth', certainty * 2 + 3.0);
+                }
+            })
+        }
 
         {# run the looping function once the document is fully loaded #}
         $(document).ready(function () {
-            setInterval(aware, 500);
+            setInterval(update, 100);
         });
     </script>
     <div id="title" style="
