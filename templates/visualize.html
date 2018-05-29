@@ -114,6 +114,17 @@
         $(document).ready(function () {
             setInterval(update, 100);
         });
+
+        function force_refresh() {
+            initiated = 0;
+            engaged = 0;
+            $('#graphs').innerHTML = '';
+            var url = window.location.href;
+            if (url.indexOf('?') > -1) {
+                url = url.substring(0,url.indexOf('?'))
+                window.location = url;
+            }
+        }
     </script>
     <div id="title" style="
             width:100%;
@@ -123,6 +134,7 @@
             background:rgba(0,0,0,0);
             position:fixed;"
          title="EpiSim">
+        <button type="button" onclick="force_refresh()">Reset!</button>
         <h1 align="center">EpiSim</h1>
         <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
     </div>
