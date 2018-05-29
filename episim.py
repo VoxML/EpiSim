@@ -25,6 +25,7 @@ AWARE_COLOR = "00,250,00"
 # initialize global variables
 all_concepts = {}
 initialized = False
+engaged = False
 queue = {}
 
 # and initialize flask app
@@ -222,19 +223,27 @@ def get_representation(concept):
 @app.route('/init', methods=['POST'])
 def init():
     global initialized
+    global engaged
     global all_concepts
 
     inp_json = request.get_json()
     all_concepts[ConceptType.ACTION] = get_concepts(inp_json, 'ACTION')
     all_concepts[ConceptType.OBJECT] = get_concepts(inp_json, 'OBJECT')
     all_concepts[ConceptType.PROPERTY] = get_concepts(inp_json, 'PROPERTY')
+    if initialized:
+        engaged = True
     initialized = True
-    return str(initialized)
+    if (initialized):
+        return "200"
+    else:
+        return "500"
+
+
 
 
 @app.route('/initloop')
 def is_initialized():
-    return "0" if not initialized else "1"
+    return "0" if not initialized else "1" if not engaged else "2"
 
 
 def get_concepts(concept_json, concept_type):
