@@ -9,6 +9,7 @@
     <script type="text/javascript">
         {# 0/F - waiting for init, 1/T - waiting for update #}
         var initiated = 0;
+        var engaged = 0;
 
         function getCertaintyColor(certainty) {
             let fullHighlight;
@@ -43,9 +44,21 @@
         function update() {
             if (!initiated) {
                 wait_init();
-            }  else {
-                wait_aware()
+            } else if (!engaged) {
+                wait_engage();
+            } else {
+                wait_aware();
             }
+        }
+
+        function wait_engage() {
+            $.getJSON($SCRIPT_ROOT + '/initloop',
+            function (data) {
+                if (parseInt(data) == 2) {
+                    $('#graphs').show();
+                    engaged = 1;
+                }
+            });
         }
 
         {# define looping function for epistemic initialization #}
@@ -73,12 +86,8 @@
             function (data) {
                 {# feed "0" when diana says "bye", then reload page and flip the loop fn #}
                 if (parseInt(data) === 0) {
-                    initiated = 0;
-                    var url = window.location.href;
-                    if (url.indexOf('?') > -1) {
-                        url = url.substring(0,url.indexOf('?'))
-                        window.location = url;
-                    }
+                    engaged = 0;
+                    $('#graphs').hide();
                     return;
                 }
                 let id;
@@ -117,7 +126,9 @@
         <h1 align="center">EpiSim</h1>
         <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
     </div>
-    {{ concept_divs|safe }}
-    {{ relation_svg|safe }}
-    {{ property_boxes|safe }}
+    <div id="graphs">
+        {{ concept_divs|safe }}
+        {{ relation_svg|safe }}
+        {{ property_boxes|safe }}
+    </div>
 </body>
