@@ -93,14 +93,14 @@
                 let id;
                 let splitted;
                 for (const i in data.c) {
-                    splitted = data.c[i].split("::");
+                    splitted = data.c[i].split("|");
                     id = splitted[0];
                     var certainty = parseFloat(splitted[1]);
                     var object = $('#C' + id);
                     object.css('background', 'rgba(' + getCertaintyColor(certainty) + ')');
                 }
                 for (const j in data.r) {
-                    splitted = data.r[j].split("::");
+                    splitted = data.r[j].split("|");
                     id = splitted[0];
                     certainty = parseFloat(splitted[1]);
                     object = $('#R' + id);
