@@ -5,7 +5,7 @@ from model import Concepts, Concept, ConceptType, ConceptMode, PropertyType
 
 # some constants
 CONCEPT_ID_SEP = ':'
-CONCEPT_CERTAINTY_SEP = '::'
+CONCEPT_CERTAINTY_SEP = '|'
 JSON_SUBGROUP_SUFFIX = '-subgroups'
 JSON_RELATION_SUFFIX = '-relations'
 JSON_RELATION_CONNECTOR = '-'
