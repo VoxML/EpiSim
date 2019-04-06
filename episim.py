@@ -27,9 +27,10 @@ all_concepts = {}
 initialized = False
 engaged = False
 queue = {}
+grab_gesture_anchor_loc = {'x': 0, 'y': 0}
 
 # and initialize flask app
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 
 def get_xoffset(cidx):
@@ -43,7 +44,7 @@ def get_yoffset(ctype, cmode=ConceptMode(0)):
 def get_anchor(ctype, cmode, cidx):
     x = get_xoffset(cidx) + CONCEPT_WIDTH / 2 - ANCHOR_AMEND
     y = get_yoffset(ctype, cmode) + CONCEPT_HEIGHT * (-cmode.value + 1) - ANCHOR_AMEND
-    return {'x': str(x), 'y': str(y)}
+    return {'x': str(int(x)), 'y': str(int(y))}
 
 
 def get_group_box_anchors(ctype, cmode, begin_idx, end_idx):
@@ -225,11 +226,13 @@ def init():
     global initialized
     global engaged
     global all_concepts
+    global grab_gesture_anchor_loc
 
     inp_json = request.get_json()
     all_concepts[ConceptType.ACTION] = get_concepts(inp_json, 'ACTION')
     all_concepts[ConceptType.OBJECT] = get_concepts(inp_json, 'OBJECT')
     all_concepts[ConceptType.PROPERTY] = get_concepts(inp_json, 'PROPERTY')
+    find_grab_gesture_anchor()
     if initialized:
         engaged = True
     initialized = True
@@ -239,6 +242,12 @@ def init():
         return "500"
 
 
+def find_grab_gesture_anchor():
+    global all_concepts
+    global grab_gesture_anchor_loc
+
+    grab_gesture = Concept("grab", ConceptType.ACTION, ConceptMode.G)
+    grab_gesture_anchor_loc = get_anchor(ConceptType.ACTION, ConceptMode.G, all_concepts[ConceptType.ACTION].get_index(grab_gesture))
 
 
 @app.route('/initloop')
@@ -350,13 +359,14 @@ def jsonify_incoming_aware():
         jsonified = jsonify(queue)
     # otherwise, nothing is POST-ed / enqueued
     else:
-        jsonified = jsonify(c=[], r=[])
+        jsonified = jsonify(c=[], r=[], l=[])
     queue = {}
     return jsonified
 
 
 @app.route('/')
 def index():
+    global grab_gesture_anchor_loc
     return render_template('visualize.html',
                            startColor=UNAWARE_COLOR,
                            midColor=UNCERTAIN_COLOR,
@@ -364,6 +374,8 @@ def index():
                            concept_divs=get_all_concepts_divs(),
                            relation_svg=get_all_relations_svgs(),
                            property_boxes=get_property_grouping_boxes(),
+                           grab_anchor_x=int(grab_gesture_anchor_loc['x']),
+                           grab_anchor_y=int(grab_gesture_anchor_loc['y']),
                            hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
 
 
@@ -389,4 +401,4 @@ if __name__ == '__main__':
         help='Specify host name for EpiSim to listen to.'
     )
     args = parser.parse_args()
-    app.run(host=args.host, port=args.port)
+    app.run(host=args.host, port=args.port, debug=True)

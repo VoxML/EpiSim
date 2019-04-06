@@ -1,10 +1,23 @@
 <!doctype html>
 <title>{{ title }}</title>
-<script type="text/javascript"
-        src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript">
-    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>EpiSim</title>
+    <style>
+        #cy {
+            width: 50%;
+            height: 150px;
+            display: block;
+            border:1px solid black;
+        }
+    </style>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/cytoscape.min.js') }}"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+</head>
 <body>
     <script type="text/javascript">
         {# 0/F - waiting for init, 1/T - waiting for update #}
@@ -71,11 +84,12 @@
                     {# hack job to force reload just once #}
                     var url = window.location.href;
                     if (url.indexOf('?') < 1) {
-                        if(url.indexOf('init') < 0){
+                        if (url.indexOf('init') < 0) {
                             url = url + "?init=true";
                             window.location = url;
                         }
                     }
+                    placeCyDiv({{ grab_anchor_x - 100 }}, {{ grab_anchor_y + 180 }});
                 }
             })
         }
@@ -88,6 +102,7 @@
                 if (parseInt(data) === 0) {
                     engaged = 0;
                     $('#graphs').hide();
+                    {#$('#cy').hide();#}
                     return;
                 }
                 let id;
@@ -107,8 +122,16 @@
                     object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
                     object.css('strokewidth', certainty * 2 + 3.0);
                 }
+                for (const k in data.l) {
+                    add_cy_node(k);
+                }
             })
         }
+
+        function add_cy_node(k) {
+
+        }
+
 
         {# run the looping function once the document is fully loaded #}
         $(document).ready(function () {
@@ -143,4 +166,15 @@
         {{ relation_svg|safe }}
         {{ property_boxes|safe }}
     </div>
+    <div id="cy"></div>
+    <script>
+
+        function placeCyDiv(x_pos, y_pos) {
+            var d = document.getElementById('cy');
+            d.style.position = "absolute";
+            d.style.left = x_pos+'px';
+            d.style.top = y_pos+'px';
+        }
+    </script>
+
 </body>
