@@ -19,64 +19,64 @@
     </script>
 </head>
 <body>
-    <script type="text/javascript">
-        {# 0/F - waiting for init, 1/T - waiting for update #}
-        var initiated = 0;
-        var engaged = 0;
+<script type="text/javascript">
+    {# 0/F - waiting for init, 1/T - waiting for update #}
+    var initiated = 0;
+    var engaged = 0;
 
-        function getCertaintyColor(certainty) {
-            let fullHighlight;
-            let defaultColor;
-            if (certainty < 0) {
-                return [80, 80, 80, 1.0];
-            }
-            const highlighted = [];
-            if (certainty <= 0.5) {
-                defaultColor = "{{ startColor }}".split(",");
-                fullHighlight = "{{ midColor }}".split(",");
-                certainty = certainty * 2;
-            } else {
-                defaultColor = "{{ midColor }}".split(",");
-                fullHighlight = "{{ endColor }}".split(",");
-                certainty = (certainty - 0.5) * 2;
-            }
-            for (var i=0;i<3;i++) {
-                const defaultColorI = parseInt(defaultColor[i]);
-                const fullHighlightI = parseInt(fullHighlight[i]);
-                if (defaultColorI > fullHighlightI) {
-                    highlighted.push(Math.round(defaultColorI - (defaultColorI - fullHighlightI) * certainty));
-                } else {
-                    highlighted.push(Math.round(defaultColorI + (fullHighlightI - defaultColorI) * certainty));
-                }
-            }
-            highlighted.push(1.0);
-            return highlighted;
-
+    function getCertaintyColor(certainty) {
+        let fullHighlight;
+        let defaultColor;
+        if (certainty < 0) {
+            return [80, 80, 80, 1.0];
         }
-
-        function update() {
-            if (!initiated) {
-                wait_init();
-            } else if (!engaged) {
-                wait_engage();
+        const highlighted = [];
+        if (certainty <= 0.5) {
+            defaultColor = "{{ startColor }}".split(",");
+            fullHighlight = "{{ midColor }}".split(",");
+            certainty = certainty * 2;
+        } else {
+            defaultColor = "{{ midColor }}".split(",");
+            fullHighlight = "{{ endColor }}".split(",");
+            certainty = (certainty - 0.5) * 2;
+        }
+        for (var i=0;i<3;i++) {
+            const defaultColorI = parseInt(defaultColor[i]);
+            const fullHighlightI = parseInt(fullHighlight[i]);
+            if (defaultColorI > fullHighlightI) {
+                highlighted.push(Math.round(defaultColorI - (defaultColorI - fullHighlightI) * certainty));
             } else {
-                wait_aware();
+                highlighted.push(Math.round(defaultColorI + (fullHighlightI - defaultColorI) * certainty));
             }
         }
+        highlighted.push(1.0);
+        return highlighted;
 
-        function wait_engage() {
-            $.getJSON($SCRIPT_ROOT + '/initloop',
+    }
+
+    function update() {
+        if (!initiated) {
+            wait_init();
+        } else if (!engaged) {
+            wait_engage();
+        } else {
+            wait_aware();
+        }
+    }
+
+    function wait_engage() {
+        $.getJSON($SCRIPT_ROOT + '/initloop',
             function (data) {
                 if (parseInt(data) == 2) {
                     $('#graphs').show();
                     engaged = 1;
                 }
             });
-        }
+    }
 
-        {# define looping function for epistemic initialization #}
-        function wait_init() {
-            $.getJSON($SCRIPT_ROOT + '/initloop',
+    {# define looping function for epistemic initialization #}
+    function wait_init() {
+        $.getJSON($SCRIPT_ROOT + '/initloop',
             function (data) {
                 initiated = parseInt(data);
                 if (initiated) {
@@ -92,11 +92,11 @@
                     placeCyDiv({{ grab_anchor_x - 100 }}, {{ grab_anchor_y + 180 }});
                 }
             })
-        }
+    }
 
-        {# define looping function for epistemic update #}
-        function wait_aware() {
-            $.getJSON($SCRIPT_ROOT + '/awareloop',
+    {# define looping function for epistemic update #}
+    function wait_aware() {
+        $.getJSON($SCRIPT_ROOT + '/awareloop',
             function (data) {
                 {# feed "0" when diana says "bye", then reload page and flip the loop fn #}
                 if (parseInt(data) === 0) {
@@ -126,55 +126,55 @@
                     add_cy_node(k);
                 }
             })
+    }
+
+    function add_cy_node(k) {
+
+    }
+
+
+    {# run the looping function once the document is fully loaded #}
+    $(document).ready(function () {
+        setInterval(update, 100);
+    });
+
+    function force_refresh() {
+        initiated = 0;
+        engaged = 0;
+        $('#graphs').innerHTML = '';
+        var url = window.location.href;
+        if (url.indexOf('?') > -1) {
+            url = url.substring(0,url.indexOf('?'))
+            window.location = url;
         }
-
-        function add_cy_node(k) {
-
-        }
-
-
-        {# run the looping function once the document is fully loaded #}
-        $(document).ready(function () {
-            setInterval(update, 100);
-        });
-
-        function force_refresh() {
-            initiated = 0;
-            engaged = 0;
-            $('#graphs').innerHTML = '';
-            var url = window.location.href;
-            if (url.indexOf('?') > -1) {
-                url = url.substring(0,url.indexOf('?'))
-                window.location = url;
-            }
-        }
-    </script>
-    <div id="title" style="
+    }
+</script>
+<div id="title" style="
             width:100%;
             height:100px;
             left:0px;
             top:0px;
             background:rgba(0,0,0,0);
             position:fixed;"
-         title="EpiSim">
-        <button type="button" onclick="force_refresh()">Reset!</button>
-        <h1 align="center">EpiSim</h1>
-        <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
-    </div>
-    <div id="graphs">
-        {{ concept_divs|safe }}
-        {{ relation_svg|safe }}
-        {{ property_boxes|safe }}
-    </div>
-    <div id="cy"></div>
-    <script>
+     title="EpiSim">
+    <button type="button" onclick="force_refresh()">Reset!</button>
+    <h1 align="center">EpiSim</h1>
+    <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
+</div>
+<div id="graphs">
+    {{ concept_divs|safe }}
+    {{ relation_svg|safe }}
+    {{ property_boxes|safe }}
+</div>
+<div id="cy"></div>
+<script>
 
-        function placeCyDiv(x_pos, y_pos) {
-            var d = document.getElementById('cy');
-            d.style.position = "absolute";
-            d.style.left = x_pos+'px';
-            d.style.top = y_pos+'px';
-        }
-    </script>
+    function placeCyDiv(x_pos, y_pos) {
+        var d = document.getElementById('cy');
+        d.style.position = "absolute";
+        d.style.left = x_pos+'px';
+        d.style.top = y_pos+'px';
+    }
+</script>
 
 </body>
