@@ -376,6 +376,8 @@ def index():
                            property_boxes=get_property_grouping_boxes(),
                            grab_anchor_x=int(grab_gesture_anchor_loc['x']),
                            grab_anchor_y=int(grab_gesture_anchor_loc['y']),
+                           concept_w=CONCEPT_WIDTH,
+                           concept_h=CONCEPT_HEIGHT,
                            hr=INIT_YOFFSET*2.5 + CONCEPT_HEIGHT*4 + VER_INTERVAL*2 - ANCHOR_AMEND)
 
 

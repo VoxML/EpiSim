@@ -6,10 +6,10 @@
     <title>EpiSim</title>
     <style>
         #cy {
-            width: 50%;
-            height: 150px;
+            width: 70%;
+            height: {{ concept_w *1.3}}px;
             display: block;
-            border:1px solid black;
+            {#border:1px solid black;#}
         }
     </style>
     <script type="text/javascript" src="{{ url_for('static', filename='js/cytoscape.min.js') }}"></script>
@@ -69,6 +69,7 @@
             function (data) {
                 if (parseInt(data) == 2) {
                     $('#graphs').show();
+                    $('#cy').show();
                     engaged = 1;
                 }
             });
@@ -89,7 +90,8 @@
                             window.location = url;
                         }
                     }
-                    placeCyDiv({{ grab_anchor_x - 100 }}, {{ grab_anchor_y + 180 }});
+                    placeCyDiv({{ grab_anchor_x }} - {{ concept_w }} * cy_x_offset_ratio
+                        , {{ grab_anchor_y + concept_h * 1.05 }});
                 }
             })
     }
@@ -102,7 +104,7 @@
                 if (parseInt(data) === 0) {
                     engaged = 0;
                     $('#graphs').hide();
-                    {#$('#cy').hide();#}
+                    $('#cy').hide();
                     return;
                 }
                 let id;
@@ -122,16 +124,11 @@
                     object.css('stroke', 'rgba(' + getCertaintyColor(certainty) + ')');
                     object.css('strokewidth', certainty * 2 + 3.0);
                 }
-                for (const k in data.l) {
-                    add_cy_node(k);
+                for (const k of data.l) {
+                    add_cy_node(k)
                 }
             })
     }
-
-    function add_cy_node(k) {
-
-    }
-
 
     {# run the looping function once the document is fully loaded #}
     $(document).ready(function () {
@@ -158,6 +155,7 @@
             position:fixed;"
      title="EpiSim">
     <button type="button" onclick="force_refresh()">Reset!</button>
+    <button type="button" onclick="test_add()">Add!</button>
     <h1 align="center">EpiSim</h1>
     <h2 align="center">Visualizing the Agent's epistemic state about current user</h2>
 </div>
@@ -169,12 +167,98 @@
 <div id="cy"></div>
 <script>
 
+    var learnedGesture = 0;
+
     function placeCyDiv(x_pos, y_pos) {
         var d = document.getElementById('cy');
         d.style.position = "absolute";
         d.style.left = x_pos+'px';
         d.style.top = y_pos+'px';
     }
+
+    function add_cy_node(node){
+        cy.add([
+            { group: 'nodes',
+                data: { id:node.id, label:`${node.id}\n${node.str}`},
+                position: get_next_cy_node_pos(),
+                classes: 'center-center',
+                width: parseInt({{ concept_w }}),
+                height: parseInt({{ concept_h }}),
+
+        }]);
+        cy.add([{ group: 'edges',
+                data: { id: 'e'+learnedGesture, source: 'ori', target: node.id }
+            }
+        ]);
+        learnedGesture++;
+
+    }
+
+    function get_next_cy_node_pos() {
+        return {
+            x: {{ concept_w * 0.4  }} + {{  concept_w }} * learnedGesture,
+            y: {{ concept_h * 0.7 }}
+        }
+    }
+
+    var cy_x_offset_ratio = 1.0;
+
+    var cy = cytoscape({
+        container: document.getElementById('cy'), // container to render in
+        elements: [ // list of graph elements to start with
+            {#cy.add({#}
+            {#    group: 'nodes',#}
+            {#    data: { weight: 75 },#}
+            {#    position: { x: 200, y: 200 }#}
+            { // node a
+                data: { id: 'ori', label:""},
+                position: { x: {{ concept_w }} * cy_x_offset_ratio, y: 0 },
+            }
+        ],
+
+        style: [ // the stylesheet for the graph
+            {
+                selector: 'node',
+                style: {
+                    'background-color': getCertaintyColor(1),
+                    'label': 'data(label)',
+                    'opacity': 1,
+                    'shape': 'round-rectangle',
+                    'border-width' : 2,
+                    'border-color' : '#000',
+                    'text-valign': "center",
+                    'text-halign': "center",
+                    'text-wrap': "wrap",
+                    "text-max-width": {{ concept_w * 0.5 }},
+                    'font-size': '24px',
+                    'width': parseInt({{ concept_w * 0.6 }}),
+                    'height': parseInt({{ concept_h * 0.6 }}),
+
+                }
+            },
+
+            {
+                selector: 'edge',
+                style: {
+                    'width': 10,
+                    'curve-style': 'straight',
+                    'line-color': getCertaintyColor(1),
+                    'target-arrow-color': '#000',
+                    'target-arrow-shape': 'triangle',
+                    'font-size': '48px'
+                }
+            }
+        ],
+
+        layout: {
+            name: 'preset',
+            fit: false,
+            padding: 10,
+            animate: true,
+
+        }
+    });
+    cy.$('#ori').style({opacity:0, width:1, height:1})
 </script>
 
 </body>
