@@ -182,10 +182,8 @@
                 data: { id:node.id, label:`${node.id}\n${node.str}`},
                 position: get_next_cy_node_pos(),
                 classes: 'center-center',
-                width: parseInt({{ concept_w }}),
-                height: parseInt({{ concept_h }}),
-
-        }]);
+            }
+        ]);
         cy.add([{ group: 'edges',
                 data: { id: 'e'+learnedGesture, source: 'ori', target: node.id }
             }
